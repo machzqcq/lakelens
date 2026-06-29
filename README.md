@@ -307,7 +307,7 @@ The framing and statistics in this README draw on:
 
 ## Enterprise deployment & support
 
-Running this in production for a team, a business unit, or a whole enterprise? We offer paid services that go beyond the OSS surface:
+Running this in production for a team, a business unit, or a whole enterprise? We offer support that go beyond the OSS surface:
 
 - **Scoping & deployment in your environment.** Sizing, cloud-target selection (AWS / Azure / GCP / on-prem), external-Spark vs DuckDB engine choice, network + secrets posture, RBAC model, integration with your IdP / SSO — delivered into your environment, owned by you afterwards.
 - **Managed hosting (alternative — we run it for you).** Prefer not to host in your own environment? We can run the app on dedicated infrastructure on your behalf — with a secure, read-only connection to your Databricks workspace, SSO integration, and SLA-backed uptime. Your data stays governed; you skip the deployment + ongoing-ops overhead. Single-tenant by default; bring-your-own-cloud-account also available.
