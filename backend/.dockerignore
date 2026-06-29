@@ -1,0 +1,13 @@
+# Local virtualenv — must not clobber the venv built inside the image
+.venv
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+# Local env / secrets
+.env
+# VCS
+.git

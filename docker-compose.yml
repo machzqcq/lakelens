@@ -1,0 +1,214 @@
+services:
+  db:
+    image: postgres:16
+    container_name: databricks_billing_db
+    environment:
+      POSTGRES_DB: databricks_billing
+      POSTGRES_USER: billing_user
+      POSTGRES_PASSWORD: billing_pass
+    ports:
+      - "5436-5439:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U billing_user -d databricks_billing"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      network: host
+    container_name: databricks_billing_backend
+    ports:
+      - "8000-8010:8000"
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: databricks_billing
+      DB_USER: billing_user
+      DB_PASS: billing_pass
+      DATA_DIR: /app/data
+      AUTO_EXTRACT: "true"
+      EXTRACT_START_DATE: "2024-01-01"
+      # The backend no longer talks to Databricks directly. It proxies
+      # extraction to this URL (the `extractor` service below).
+      EXTRACTOR_URL: http://extractor:8000
+    volumes:
+      - ./data:/app/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # Isolated Databricks extraction worker.
+  #
+  # WHY a separate container: the backend pins pyspark 4.1.1 to talk to the
+  # local Spark Connect 4.1.1 server, but databricks-connect 16.x is built on
+  # pyspark 3.5.x. They cannot coexist in one venv (they fight over the
+  # pyspark.sql.connect.expressions namespace). Putting databricks-connect in
+  # its own image breaks the version battle cleanly.
+  #
+  # The extractor writes timestamped parquet files to /app/data (host
+  # ./data — same volume the backend reads); the backend ingests them into
+  # Postgres via the existing ingest_from_parquet path.
+  # ---------------------------------------------------------------------------
+  extractor:
+    build:
+      context: ./extractor
+      network: host
+    container_name: databricks_billing_extractor
+    env_file:
+      - .env
+    environment:
+      DATA_DIR: /app/data
+    volumes:
+      - ./data:/app/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  frontend:
+    build:
+      context: ./frontend
+      network: host
+    container_name: databricks_billing_frontend
+    ports:
+      - "3000-3010:3000"
+    environment:
+      API_URL: http://backend:8000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - backend
+
+  # ---------------------------------------------------------------------------
+  # Apache Spark 4.1.1 — three services (master, worker, connect) that back
+  # the optional Spark engine for Query Intel. Selected via the admin engine
+  # toggle in Data Management. When `query_intel_engine='duckdb'` (default)
+  # these services sit idle.
+  #
+  # Profile-gated: these services ONLY start when the `local-spark` profile
+  # is requested. For production deployments that point at an external
+  # Spark Connect endpoint or a Databricks workspace, leave the profile
+  # OFF and configure the backend with `SPARK_CONNECT_URL` (or
+  # `SPARK_CONNECT_HOST` + `SPARK_CONNECT_PORT` + optional
+  # `SPARK_CONNECT_TOKEN` / `SPARK_CONNECT_USE_SSL`). See
+  # docs/technical/SPARK_EXTERNAL_DEPLOYMENT.md for the full integration
+  # checklist.
+  #
+  # Usage:
+  #   docker compose up                            # backend + db + extractor + frontend
+  #                                                # (no Spark, suitable for DuckDB-only
+  #                                                #  or external-Spark deployments)
+  #   docker compose --profile local-spark up      # also brings up master/worker/connect
+  #
+  # Storage: qi_* tables are written as Delta Lake tables under
+  # /opt/spark/spark-warehouse, which is bind-mounted to ./data/spark-warehouse
+  # on the host so they survive container rebuilds.
+  #
+  # The first spark-connect startup downloads delta-spark + transitive JARs
+  # via Ivy — ~2-5 minutes. Subsequent starts hit the ivy-cache volume.
+  # ---------------------------------------------------------------------------
+  spark-master:
+    image: apache/spark:4.1.1
+    container_name: databricks_billing_spark_master
+    profiles: ["local-spark"]
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master", "--host", "0.0.0.0", "--port", "7077", "--webui-port", "8080"]
+    ports:
+      - "7077:7077"
+      - "8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080 >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  spark-worker:
+    image: apache/spark:4.1.1
+    container_name: databricks_billing_spark_worker
+    profiles: ["local-spark"]
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "--webui-port", "8081", "spark://spark-master:7077"]
+    environment:
+      SPARK_WORKER_CORES: "2"
+      # Bumped from 2g → 4g so executor heap (default 1g; we now request
+      # 3g below) fits. Pulling JDBC-backed temp views (e.g. table_lineage
+      # with ~8M rows on real accounts) into a small heap OOMs the worker
+      # even with predicate / limit pushdown enabled.
+      SPARK_WORKER_MEMORY: "4g"
+    ports:
+      - "8081:8081"
+    # The worker (executor JVM) must see the SAME spark-warehouse path as the
+    # connect driver — Delta writes through the executor, reads through the
+    # driver, and both need the same filesystem view.
+    volumes:
+      - ./data/spark-warehouse:/opt/spark/spark-warehouse
+    depends_on:
+      spark-master:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  spark-connect:
+    image: apache/spark:4.1.1
+    container_name: databricks_billing_spark_connect
+    profiles: ["local-spark"]
+    # Foreground spark-submit so errors land in `docker logs`. The connect
+    # service-class runs the gRPC server on port 15002 until killed.
+    # --packages downloads Delta Lake JARs on first run; the ivy-cache volume
+    # makes subsequent starts fast.
+    command:
+      - /opt/spark/bin/spark-submit
+      - --class
+      - org.apache.spark.sql.connect.service.SparkConnectServer
+      - --name
+      - SparkConnectServer
+      - --master
+      - spark://spark-master:7077
+      - --driver-memory
+      - 2g
+      # Executor heap. The default 1g OOMs on JDBC reads of large
+      # Postgres-resident tables (table_lineage, column_lineage). 3g is
+      # comfortable for our row shapes with pushDownLimit enabled, and
+      # still leaves headroom inside the 4g worker pool above.
+      - --conf
+      - spark.executor.memory=3g
+      - --conf
+      - spark.jars.ivy=/tmp/.ivy2
+      - --conf
+      - spark.driver.extraJavaOptions=-Duser.home=/tmp
+      # Delta Lake (qi_* persistence) + Postgres JDBC driver (for reading
+      # base tables billing_usage/clusters/warehouses/etc. directly from the
+      # operational Postgres in Spark engine mode).
+      - --packages
+      - io.delta:delta-spark_2.13:4.1.0,org.postgresql:postgresql:42.7.4
+      - --conf
+      - spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension
+      - --conf
+      - spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog
+      - --conf
+      - spark.sql.warehouse.dir=/opt/spark/spark-warehouse
+      - --conf
+      - spark.connect.grpc.binding.port=15002
+    ports:
+      - "15002:15002"
+    volumes:
+      - ./data/spark-warehouse:/opt/spark/spark-warehouse
+    depends_on:
+      spark-master:
+        condition: service_healthy
+      spark-worker:
+        condition: service_started
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  pgdata:

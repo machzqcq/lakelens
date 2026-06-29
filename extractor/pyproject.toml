@@ -1,0 +1,18 @@
+[project]
+name = "databricks-extractor"
+version = "1.0.0"
+description = "Isolated Databricks extraction worker. databricks-connect pulls SQL from a Databricks workspace, writes timestamped parquet snapshots to /data; the backend reads them and ingests into Postgres."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi==0.115.12",
+    "uvicorn[standard]==0.34.2",
+    "pydantic==2.11.3",
+    "pandas==2.2.3",
+    "pyarrow==19.0.1",
+    "python-dotenv==1.1.0",
+    # The whole point of this service: databricks-connect (bundles its own
+    # pyspark 3.5.x via transitive deps) lives here and ONLY here, isolated
+    # from the backend's pyspark 4.1.1 which targets the local Spark Connect.
+    "databricks-connect>=16.1,<17",
+    "databricks-sdk>=0.44,<1",
+]

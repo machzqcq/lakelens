@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+/* =========================================================================
+   Theme system
+   - Default theme is "light" (Apple-ish blue).
+   - ThemeProvider sets data-theme="<name>" on <html>; the matching block
+     below overrides the variables.
+   - Every page reads colors via the var(--color-*) custom properties, so
+     swapping themes requires no component changes.
+   ========================================================================= */
+
+:root,
+:root[data-theme="light"] {
+  --color-primary: #0071e3;
+  --color-primary-light: #2997ff;
+  --color-primary-dark: #0058b9;
+  --color-accent: #00856f;
+  --color-success: #248a3d;
+  --color-warning: #e67700;
+  --color-danger: #d70015;
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f5f5f7;
+  --color-bg-card: #ffffff;
+  --color-bg-card-hover: #f0f0f2;
+  --color-text-primary: #1d1d1f;
+  --color-text-secondary: #6e6e73;
+  --color-text-muted: #86868b;
+  --color-border: #d2d2d7;
+  /* Login page hero gradient */
+  --hero-gradient: linear-gradient(135deg, #4f46e5 0%, #0071e3 50%, #06b6d4 100%);
+}
+
+:root[data-theme="dark"] {
+  --color-primary: #2997ff;
+  --color-primary-light: #60a5fa;
+  --color-primary-dark: #0071e3;
+  --color-accent: #34d399;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-bg-primary: #1c1c1e;
+  --color-bg-secondary: #18181a;
+  --color-bg-card: #2c2c2e;
+  --color-bg-card-hover: #3a3a3c;
+  --color-text-primary: #f5f5f7;
+  --color-text-secondary: #c7c7cc;
+  --color-text-muted: #8e8e93;
+  --color-border: #3a3a3c;
+  --hero-gradient: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #0e7490 100%);
+}
+
+:root[data-theme="midnight"] {
+  --color-primary: #a78bfa;
+  --color-primary-light: #c4b5fd;
+  --color-primary-dark: #7c3aed;
+  --color-accent: #f472b6;
+  --color-success: #4ade80;
+  --color-warning: #facc15;
+  --color-danger: #f87171;
+  --color-bg-primary: #0f0f1a;
+  --color-bg-secondary: #07070d;
+  --color-bg-card: #1a1a2e;
+  --color-bg-card-hover: #252540;
+  --color-text-primary: #ede9fe;
+  --color-text-secondary: #c4b5fd;
+  --color-text-muted: #8b8ba7;
+  --color-border: #2d2d4a;
+  --hero-gradient: linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #be185d 100%);
+}
+
+:root[data-theme="forest"] {
+  --color-primary: #15803d;
+  --color-primary-light: #22c55e;
+  --color-primary-dark: #166534;
+  --color-accent: #ca8a04;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #b91c1c;
+  --color-bg-primary: #fdfcf7;
+  --color-bg-secondary: #f4f1e8;
+  --color-bg-card: #ffffff;
+  --color-bg-card-hover: #ebe7d8;
+  --color-text-primary: #1c2511;
+  --color-text-secondary: #4d5d3a;
+  --color-text-muted: #7a8964;
+  --color-border: #d6cfb6;
+  --hero-gradient: linear-gradient(135deg, #14532d 0%, #15803d 50%, #65a30d 100%);
+}
+
+:root[data-theme="sunset"] {
+  --color-primary: #ea580c;
+  --color-primary-light: #fb923c;
+  --color-primary-dark: #c2410c;
+  --color-accent: #db2777;
+  --color-success: #65a30d;
+  --color-warning: #ca8a04;
+  --color-danger: #dc2626;
+  --color-bg-primary: #fff8f1;
+  --color-bg-secondary: #fef3e7;
+  --color-bg-card: #ffffff;
+  --color-bg-card-hover: #fde9d3;
+  --color-text-primary: #431407;
+  --color-text-secondary: #7c2d12;
+  --color-text-muted: #9a3412;
+  --color-border: #fbd5b5;
+  --hero-gradient: linear-gradient(135deg, #be185d 0%, #ea580c 50%, #facc15 100%);
+}
+
+:root[data-theme="ocean"] {
+  --color-primary: #0e7490;
+  --color-primary-light: #06b6d4;
+  --color-primary-dark: #155e75;
+  --color-accent: #0d9488;
+  --color-success: #10b981;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --color-bg-primary: #f0fdfa;
+  --color-bg-secondary: #ecfeff;
+  --color-bg-card: #ffffff;
+  --color-bg-card-hover: #cffafe;
+  --color-text-primary: #042f2e;
+  --color-text-secondary: #134e4a;
+  --color-text-muted: #475569;
+  --color-border: #a5f3fc;
+  --hero-gradient: linear-gradient(135deg, #155e75 0%, #0d9488 50%, #06b6d4 100%);
+}
+
+body {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }

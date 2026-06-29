@@ -1,0 +1,66 @@
+# Isolated test stack. Runs on different ports than the dev stack so you
+# can have both up at once.
+#
+#   docker compose -f tests/docker-compose.test.yml up -d --build
+#   ... run tests ...
+#   docker compose -f tests/docker-compose.test.yml down -v
+#
+# Volumes are anonymous (no host bind, no named volume) so every `down -v`
+# gives you a pristine Postgres.
+
+services:
+  test-db:
+    image: postgres:16
+    container_name: dbx_cost_test_db
+    environment:
+      POSTGRES_DB: dbx_cost_test
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_pass
+    ports:
+      - "55432:5432"
+    tmpfs:
+      - /var/lib/postgresql/data        # ephemeral; gone on container stop
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d dbx_cost_test"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+
+  test-backend:
+    build:
+      context: ../backend
+    container_name: dbx_cost_test_backend
+    ports:
+      - "58000:8000"
+    environment:
+      DB_HOST: test-db
+      DB_PORT: "5432"
+      DB_NAME: dbx_cost_test
+      DB_USER: test_user
+      DB_PASS: test_pass
+      DATA_DIR: /app/data
+      APP_ENV: test
+      JWT_SECRET: test-jwt-secret-not-for-prod-use
+      DEFAULT_ADMIN_EMAIL: admin@test.local
+      DEFAULT_ADMIN_PASSWORD: TestAdmin12345!
+      EXPOSE_DEV_CREDENTIALS: "true"
+      APP_BASE_URL: http://localhost:53000
+      CORS_ALLOW_ORIGINS: "*"
+      AUTO_EXTRACT: "false"
+      DATA_STORE: local
+    volumes:
+      - ../data:/app/data:ro            # read-only — tests must not mutate parquet
+    depends_on:
+      test-db:
+        condition: service_healthy
+
+  test-frontend:
+    build:
+      context: ../frontend
+    container_name: dbx_cost_test_frontend
+    ports:
+      - "53000:3000"
+    environment:
+      VITE_API_BASE: http://localhost:58000
+    depends_on:
+      - test-backend
