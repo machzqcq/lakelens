@@ -17,6 +17,8 @@
 
 A self-hosted web app that turns the Databricks `system.*` tables and Unity Catalog `INFORMATION_SCHEMA` into a **federated data-governance control plane**: column-level lineage, end-to-end impact analysis, data-quality observability, audit-trail forensics, cost & FinOps dashboards, master-data-style canonical-key tracking, and a natural-language chatbot that grounds its answers in your governed metadata — all running outside the Databricks workspace it observes.
 
+> 🌐 **Try the live demo — [lakelens.ai](https://lakelens.ai)** — a fully-static, browser-only mock of every dashboard, chatbot, and admin surface. No signup, no backend, no Databricks workspace needed. Walk every page, click every filter, then come back here to deploy your own copy.
+
 ```bash
 docker compose up        # http://localhost:3000
 ```
@@ -255,20 +257,34 @@ PRs adding the Snowflake extractor (parallel to `extractor/` for Databricks) are
 
 ---
 
-## Documentation map
+## 📚 Documentation map
 
-| If you want… | Read… |
-|---|---|
-| First-run + dashboard tour | [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) |
-| Per-column schema reference | [`docs/DATA_DICTIONARY.md`](docs/DATA_DICTIONARY.md) |
-| Choose a data-quality framework (8-way comparative deep-dive) | [`docs/DATA_QUALITY.md`](docs/DATA_QUALITY.md) |
-| Architecture + tech stack | [`docs/technical/README.md`](docs/technical/README.md) |
-| Security + RBAC model | [`docs/technical/SECURITY.md`](docs/technical/SECURITY.md) |
-| Cloud deployment | [`deploy/README.md`](deploy/README.md) + [`docs/technical/CLOUD_MIGRATION.md`](docs/technical/CLOUD_MIGRATION.md) |
-| External Spark / Databricks integration | [`docs/technical/SPARK_EXTERNAL_DEPLOYMENT.md`](docs/technical/SPARK_EXTERNAL_DEPLOYMENT.md) |
-| DuckDB vs Spark engine choice | [`docs/technical/QUERY_ENGINE.md`](docs/technical/QUERY_ENGINE.md) |
-| Feature deep-dives (audit, compute, lineage) | [`docs/features_grouped/README.md`](docs/features_grouped/README.md) |
-| Business scenarios per persona | [`docs/scenarios/README.md`](docs/scenarios/README.md) |
+> **Pick your entry point.** Each link opens a self-contained guide — the full tree lives in [`docs/`](docs/). Grouped below by the question you're trying to answer.
+
+### 🚀 Getting started — *"I just landed here, where do I begin?"*
+
+| | If you want… | Read… |
+|:-:|---|---|
+| 🎯 | First-run + dashboard tour | [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) |
+| 🎭 | Business scenarios per persona | [`docs/scenarios/README.md`](docs/scenarios/README.md) |
+| 📋 | Per-column schema reference | [`docs/DATA_DICTIONARY.md`](docs/DATA_DICTIONARY.md) |
+
+### 🧩 Architecture & engineering — *"How is this thing built and deployed?"*
+
+| | If you want… | Read… |
+|:-:|---|---|
+| 🏗️ | Architecture + tech stack | [`docs/technical/README.md`](docs/technical/README.md) |
+| 🦆 | DuckDB vs Spark engine choice | [`docs/technical/QUERY_ENGINE.md`](docs/technical/QUERY_ENGINE.md) |
+| ⚡ | External Spark / Databricks integration | [`docs/technical/SPARK_EXTERNAL_DEPLOYMENT.md`](docs/technical/SPARK_EXTERNAL_DEPLOYMENT.md) |
+| 🔐 | Security + RBAC model | [`docs/technical/SECURITY.md`](docs/technical/SECURITY.md) |
+| ☁️ | Cloud deployment | [`deploy/README.md`](deploy/README.md) + [`docs/technical/CLOUD_MIGRATION.md`](docs/technical/CLOUD_MIGRATION.md) |
+
+### 🔬 Deep dives & quality — *"I want to go deeper on one pillar."*
+
+| | If you want… | Read… |
+|:-:|---|---|
+| ✅ | Choose a data-quality framework (8-way comparative deep-dive) | [`docs/DATA_QUALITY.md`](docs/DATA_QUALITY.md) |
+| 🧪 | Feature deep-dives (audit, compute, lineage) | [`docs/features_grouped/README.md`](docs/features_grouped/README.md) |
 
 ---
 
