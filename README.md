@@ -316,7 +316,7 @@ Running this in production for a team, a business unit, or a whole enterprise? W
 - **Custom scenarios & dashboards.** Build org-specific scenarios on top of the existing per-persona scenario library ([`docs/scenarios/`](docs/scenarios/)) — e.g. your regulator-facing audit pack, your CFO's cost-attribution view, your data-product health card.
 - **Ongoing maintenance & support.** Versioned upgrades, security patches, system-table coverage expansion (e.g. the Snowflake parity track above), SLA-backed incident response.
 
-**Interested?** Reach out to the author — **[pradeep@automationpractice.com](mailto:pradeep@automationpractice.com)** — with a short note about your stack (Databricks workspace count, data scale, persona mix) and what success looks like in the first 90 days. We'll come back with a scoped engagement plan.
+**Interested?** Reach out to the author — **[pradeep@automationpractice.com](mailto:pradeep@automationpractice.com)** — with a short note about your stack (Databricks workspace count, data scale, persona mix) and what success looks like in the first 90 days.
 
 ---
 
