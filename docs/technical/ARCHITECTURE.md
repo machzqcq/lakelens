@@ -711,10 +711,10 @@ flowchart TB
     SW --> DL
     SC --> DL
 
-    PG_QI -. duckdb engine .-> QI_RT
-    DL -. spark engine .-> QI_RT
-    PG_QI -. duckdb engine (ATTACH) .-> CHAT
-    DL -. spark engine (spark.sql) .-> CHAT
+    PG_QI -.->|duckdb engine| QI_RT
+    DL -.->|spark engine| QI_RT
+    PG_QI -.->|"duckdb engine (ATTACH)"| CHAT
+    DL -.->|"spark engine (spark.sql)"| CHAT
 ```
 
 ### Transform stage — engine-independent
