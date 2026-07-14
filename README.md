@@ -1,5 +1,11 @@
 # Lakelens
 
+🎬 **Watch the explainer — *Lakehouse Survival Guide*** (click the image to play the 90-second video):
+
+<a href="https://s3.us-east-1.amazonaws.com/static.lakelens.ai/Lakehouse_Survival_Guide.mp4"><img src="./static_images/lakelens-video-image.jpg" alt="Lakehouse Survival Guide — click to play the 90-second explainer" width="960" style="max-width:100%; height:auto; display:block;" /></a>
+
+> 🌐 **Try the live demo — [lakelens.ai](https://lakelens.ai)** — a fully-static, browser-only mock of every dashboard, chatbot, and admin surface. No signup, no backend, no Databricks workspace needed. Walk every page, click every filter, then come back here to deploy your own copy.
+
 ## Databricks Governance, Data Quality & Lineage Workbench
 
 > **The governance, data-quality, lineage, audit, and master-data-management layer for your Databricks workspace — running outside it, owned by you.**
@@ -16,8 +22,6 @@
 > Plus FinOps cost dashboards, audit forensics, compute / node-pool telemetry, and a natural-language chatbot grounded in the same governed metadata. **Your Databricks investment keeps working — this app makes it visible, accountable, and discoverable to every persona in your org.**
 
 A self-hosted web app that turns the Databricks `system.*` tables and Unity Catalog `INFORMATION_SCHEMA` into a **federated data-governance control plane**: column-level lineage, end-to-end impact analysis, data-quality observability, audit-trail forensics, cost & FinOps dashboards, master-data-style canonical-key tracking, and a natural-language chatbot that grounds its answers in your governed metadata — all running outside the Databricks workspace it observes.
-
-> 🌐 **Try the live demo — [lakelens.ai](https://lakelens.ai)** — a fully-static, browser-only mock of every dashboard, chatbot, and admin surface. No signup, no backend, no Databricks workspace needed. Walk every page, click every filter, then come back here to deploy your own copy.
 
 ```bash
 docker compose up        # http://localhost:3000
@@ -56,10 +60,6 @@ But adoption velocity has outpaced governance velocity. **64 % of organisations 
 In plain language: **garbage in, garbage out**. The more data you put inside Databricks, the more urgent it becomes to have visibility into who reads what, when it last changed, who owns it, where it flows, and which fields are trustworthy enough for downstream AI grounding.
 
 This app gives you that visibility — owned by your platform team, deployed outside Databricks, with no read-runtime dependency on the workspace.
-
-🎬 **Watch the explainer — *Lakehouse Survival Guide*** (click the image to play the 90-second video):
-
-<a href="https://s3.us-east-1.amazonaws.com/static.lakelens.ai/Lakehouse_Survival_Guide.mp4"><img src="./static_images/lakelens-video-image.jpg" alt="Lakehouse Survival Guide — click to play the 90-second explainer" width="960" style="max-width:100%; height:auto; display:block;" /></a>
 
 ---
 
